@@ -3,20 +3,16 @@ import { View, Text, TextInput } from 'react-native';
 import colors from '../../theme/colors';
 import styles from './styles';
 
-// Campo de texto reutilizável com rótulo, indicação de obrigatório e mensagem de erro.
-export default function Input({ label, obrigatorio = false, erro, ...propsDoTextInput }) {
+export default function Input({ label, erro, ...props }) {
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>
-        {label}
-        {obrigatorio && <Text style={styles.asterisco}> *</Text>}
-      </Text>
+      <Text style={styles.label}>{label}</Text>
       <TextInput
-        style={[styles.input, erro && styles.inputErro]}
-        placeholderTextColor={colors.textMuted}
-        {...propsDoTextInput}
+        style={[styles.input, erro ? styles.inputErro : null]}
+        placeholderTextColor={colors.secondary}
+        {...props}
       />
-      {!!erro && <Text style={styles.erro}>{erro}</Text>}
+      {erro ? <Text style={styles.erro}>{erro}</Text> : null}
     </View>
   );
 }

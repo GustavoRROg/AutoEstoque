@@ -1,66 +1,49 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { getVeiculos, getUsuarios, postVeiculo, postUsuario } from '../services/api';
-import { normalizarPlaca } from '../utils/validacoes';
+import { buscarVeiculos, salvarVeiculo, salvarUsuario } from '../services/api';
 
-// Estado global compartilhado pelas 4 telas (comunicação indireta).
-const AppContext = createContext(null);
+const AppContext = createContext();
 
 export function AppProvider({ children }) {
   const [usuarios, setUsuarios] = useState([]);
   const [veiculos, setVeiculos] = useState([]);
-  const [carregando, setCarregando] = useState(false);
-  const [erro, setErro] = useState(null);
-  const [origemDados, setOrigemDados] = useState('local');
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState('');
 
-  async function carregarDados() {
+  async function carregarVeiculos() {
     setCarregando(true);
-    setErro(null);
+    setErro('');
     try {
-      const [respVeiculos, respUsuarios] = await Promise.all([getVeiculos(), getUsuarios()]);
-      setVeiculos(respVeiculos.dados);
-      setUsuarios(respUsuarios.dados);
-      setOrigemDados(respVeiculos.origem);
+      const lista = await buscarVeiculos();
+      setVeiculos(lista);
     } catch (e) {
-      setErro('Não foi possível carregar os dados.');
-    } finally {
-      setCarregando(false);
+      setErro('Não foi possível carregar o estoque.');
     }
+    setCarregando(false);
   }
 
   useEffect(() => {
-    carregarDados();
+    carregarVeiculos();
   }, []);
 
   async function cadastrarUsuario(usuario) {
-    if (usuarios.some(({ cpf }) => cpf === usuario.cpf)) {
-      throw new Error('Já existe um usuário com este CPF.');
-    }
-    const { dados } = await postUsuario({ ...usuario, criadoEm: new Date().toISOString() });
-    setUsuarios((lista) => [...lista, dados]);
-    return dados;
+    const novo = await salvarUsuario(usuario);
+    setUsuarios([...usuarios, novo]);
   }
 
   async function lancarVeiculo(veiculo) {
-    if (veiculos.some(({ placa }) => normalizarPlaca(placa) === veiculo.placa)) {
-      throw new Error('Já existe um veículo com esta placa no estoque.');
-    }
-    const { dados } = await postVeiculo({ ...veiculo, criadoEm: new Date().toISOString() });
-    setVeiculos((lista) => [...lista, dados]);
-    return dados;
+    const novo = await salvarVeiculo(veiculo);
+    setVeiculos([...veiculos, novo]);
   }
 
   return (
     <AppContext.Provider
-      value={{ usuarios, veiculos, carregando, erro, origemDados, carregarDados, cadastrarUsuario, lancarVeiculo }}
+      value={{ usuarios, veiculos, carregando, erro, carregarVeiculos, cadastrarUsuario, lancarVeiculo }}
     >
       {children}
     </AppContext.Provider>
   );
 }
 
-// Hook customizado: const { usuarios, veiculos } = useApp();
 export function useApp() {
-  const contexto = useContext(AppContext);
-  if (!contexto) throw new Error('useApp deve ser usado dentro de <AppProvider>');
-  return contexto;
+  return useContext(AppContext);
 }

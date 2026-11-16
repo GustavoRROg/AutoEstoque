@@ -1,130 +1,102 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { Text, ScrollView } from 'react-native';
 import { useApp } from '../../context/AppContext';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
-import { mostrarAlerta } from '../../utils/alerta';
-import { mascararCPF, mascararTelefone, emailValido, cpfValido, somenteNumeros } from '../../utils/validacoes';
+import { mostrarAlerta } from '../../utils';
 import styles from './styles';
-
-const FORM_INICIAL = { nome: '', email: '', cpf: '', telefone: '' };
-
-// Retorna a mensagem de erro do campo, ou '' se estiver válido.
-function validarCampo(campo, valor) {
-  switch (campo) {
-    case 'nome':
-      if (!valor.trim()) return 'O nome é obrigatório.';
-      if (valor.trim().split(/\s+/).length < 2) return 'Informe nome e sobrenome.';
-      return '';
-    case 'email':
-      if (!valor.trim()) return 'O e-mail é obrigatório.';
-      return emailValido(valor) ? '' : 'E-mail inválido.';
-    case 'cpf':
-      if (!valor) return 'O CPF é obrigatório.';
-      return cpfValido(valor) ? '' : 'CPF inválido.';
-    case 'telefone':
-      if (!valor) return 'O telefone é obrigatório.';
-      return somenteNumeros(valor).length >= 10 ? '' : 'Informe DDD + número.';
-    default:
-      return '';
-  }
-}
 
 export default function Cadastro({ navigation }) {
   const { usuarios, cadastrarUsuario } = useApp();
-  const [form, setForm] = useState(FORM_INICIAL);
+  const [nome, setNome] = useState('');
+  const [email, setEmail] = useState('');
+  const [cpf, setCpf] = useState('');
+  const [telefone, setTelefone] = useState('');
   const [erros, setErros] = useState({});
-  const [enviando, setEnviando] = useState(false);
 
-  const { nome, email, cpf, telefone } = form;
-
-  function alterar(campo, valor) {
-    setForm((atual) => ({ ...atual, [campo]: valor }));
-    if (erros[campo]) setErros((atual) => ({ ...atual, [campo]: '' }));
+  function validar() {
+    const novosErros = {};
+    if (nome.trim() === '') novosErros.nome = 'O nome é obrigatório.';
+    if (email.trim() === '') {
+      novosErros.email = 'O e-mail é obrigatório.';
+    } else if (!email.includes('@') || !email.includes('.')) {
+      novosErros.email = 'E-mail inválido.';
+    }
+    if (cpf === '') {
+      novosErros.cpf = 'O CPF é obrigatório.';
+    } else if (cpf.length !== 11) {
+      novosErros.cpf = 'O CPF deve ter 11 números.';
+    } else if (usuarios.some((u) => u.cpf === cpf)) {
+      novosErros.cpf = 'Este CPF já está cadastrado.';
+    }
+    if (telefone === '') {
+      novosErros.telefone = 'O telefone é obrigatório.';
+    } else if (telefone.length < 10) {
+      novosErros.telefone = 'Informe o DDD e o número.';
+    }
+    setErros(novosErros);
+    return Object.keys(novosErros).length === 0;
   }
 
-  const validarAoSair = (campo) => setErros((atual) => ({ ...atual, [campo]: validarCampo(campo, form[campo]) }));
+  function limpar() {
+    setNome('');
+    setEmail('');
+    setCpf('');
+    setTelefone('');
+    setErros({});
+  }
 
-  async function handleCadastrar() {
-    const novosErros = Object.keys(form).reduce((acc, campo) => {
-      const mensagem = validarCampo(campo, form[campo]);
-      return mensagem ? { ...acc, [campo]: mensagem } : acc;
-    }, {});
-    setErros(novosErros);
-
-    if (Object.keys(novosErros).length > 0) {
-      mostrarAlerta('Verifique os campos', 'Corrija os campos destacados em vermelho.');
+  async function cadastrar() {
+    if (!validar()) {
+      mostrarAlerta('Atenção', 'Preencha os campos corretamente.');
       return;
     }
-
-    setEnviando(true);
     try {
-      const usuario = await cadastrarUsuario({ nome: nome.trim(), email: email.trim().toLowerCase(), cpf, telefone });
-      setForm(FORM_INICIAL);
-      mostrarAlerta('Cadastro realizado!', `${usuario.nome} foi cadastrado(a) com sucesso.`);
+      await cadastrarUsuario({ nome, email, cpf, telefone });
+      mostrarAlerta('Sucesso', 'Usuário cadastrado!');
+      limpar();
       navigation.navigate('Dashboard');
     } catch (erro) {
-      mostrarAlerta('Não foi possível cadastrar', erro.message);
-    } finally {
-      setEnviando(false);
+      mostrarAlerta('Erro', 'Não foi possível cadastrar o usuário.');
     }
   }
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={styles.conteudo} keyboardShouldPersistTaps="handled">
-        <Text style={styles.titulo}>Novo usuário</Text>
-        <Text style={styles.subtitulo}>Vendedores e gestores que operam o estoque.</Text>
-        <Text style={styles.legenda}>Todos os campos com * são obrigatórios.</Text>
+    <ScrollView style={styles.container} contentContainerStyle={styles.conteudo}>
+      <Text style={styles.titulo}>Novo usuário</Text>
+      <Text style={styles.legenda}>Todos os campos são obrigatórios.</Text>
 
-        <Input
-          label="Nome completo"
-          obrigatorio
-          placeholder="Ex.: Maria da Silva"
-          value={nome}
-          onChangeText={(t) => alterar('nome', t)}
-          onBlur={() => validarAoSair('nome')}
-          erro={erros.nome}
-        />
-        <Input
-          label="E-mail"
-          obrigatorio
-          placeholder="seuemail@exemplo.com"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          value={email}
-          onChangeText={(t) => alterar('email', t)}
-          onBlur={() => validarAoSair('email')}
-          erro={erros.email}
-        />
-        <Input
-          label="CPF"
-          obrigatorio
-          placeholder="000.000.000-00"
-          keyboardType="numeric"
-          value={cpf}
-          onChangeText={(t) => alterar('cpf', mascararCPF(t))}
-          onBlur={() => validarAoSair('cpf')}
-          erro={erros.cpf}
-        />
-        <Input
-          label="Telefone"
-          obrigatorio
-          placeholder="(11) 98765-4321"
-          keyboardType="phone-pad"
-          value={telefone}
-          onChangeText={(t) => alterar('telefone', mascararTelefone(t))}
-          onBlur={() => validarAoSair('telefone')}
-          erro={erros.telefone}
-        />
+      <Input label="Nome completo" placeholder="Ex.: Maria da Silva" value={nome} onChangeText={setNome} erro={erros.nome} />
+      <Input
+        label="E-mail"
+        placeholder="seuemail@exemplo.com"
+        keyboardType="email-address"
+        autoCapitalize="none"
+        value={email}
+        onChangeText={setEmail}
+        erro={erros.email}
+      />
+      <Input
+        label="CPF (somente números)"
+        placeholder="00000000000"
+        keyboardType="numeric"
+        value={cpf}
+        onChangeText={(texto) => setCpf(texto.replace(/[^0-9]/g, '').slice(0, 11))}
+        erro={erros.cpf}
+      />
+      <Input
+        label="Telefone com DDD (somente números)"
+        placeholder="11987654321"
+        keyboardType="phone-pad"
+        value={telefone}
+        onChangeText={(texto) => setTelefone(texto.replace(/[^0-9]/g, '').slice(0, 11))}
+        erro={erros.telefone}
+      />
 
-        <Button titulo="Cadastrar" onPress={handleCadastrar} carregando={enviando} estilo={styles.botao} />
-        <Button titulo="Limpar" variante="secundario" onPress={() => { setForm(FORM_INICIAL); setErros({}); }} />
+      <Button titulo="Cadastrar" onPress={cadastrar} />
+      <Button titulo="Limpar" secundario onPress={limpar} />
 
-        <View style={styles.info}>
-          <Text style={styles.infoTexto}>Usuários cadastrados: {usuarios.length}</Text>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      <Text style={styles.info}>Usuários cadastrados: {usuarios.length}</Text>
+    </ScrollView>
   );
 }

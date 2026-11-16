@@ -10,59 +10,33 @@ import Button from '../../components/Button';
 import colors from '../../theme/colors';
 import styles from './styles';
 
-const ORDENACOES = {
-  recentes: (a, b) => Number(b.ano) - Number(a.ano),
-  menorPreco: (a, b) => Number(a.preco) - Number(b.preco),
-  maiorPreco: (a, b) => Number(b.preco) - Number(a.preco),
-  menorKm: (a, b) => Number(a.km) - Number(b.km),
-};
-
-// Picker reutilizado nos três filtros da tela.
-function Filtro({ label, valor, onChange, opcoes }) {
-  return (
-    <View style={styles.filtro}>
-      <Text style={styles.filtroLabel}>{label}</Text>
-      <View style={styles.pickerBox}>
-        <Picker selectedValue={valor} onValueChange={onChange} style={styles.picker}>
-          {opcoes.map(({ label: rotulo, value }) => (
-            <Picker.Item key={value} label={rotulo} value={value} />
-          ))}
-        </Picker>
-      </View>
-    </View>
-  );
-}
-
-const paraOpcoes = (lista) => [{ label: 'Todos', value: 'Todos' }, ...lista.map((item) => ({ label: item, value: item }))];
-
 export default function Listagem() {
-  const { veiculos, carregando, erro, carregarDados } = useApp();
-  const [categoria, setCategoria] = useState('Todos');
-  const [status, setStatus] = useState('Todos');
-  const [ordem, setOrdem] = useState('recentes');
+  const { veiculos, carregando, erro, carregarVeiculos } = useApp();
   const [busca, setBusca] = useState('');
+  const [categoria, setCategoria] = useState('Todas');
+  const [status, setStatus] = useState('Todos');
 
-  // Filtros combinados: busca (marca/modelo/placa) + categoria + status + ordenação.
-  const termo = busca.trim().toLowerCase();
-  const veiculosFiltrados = veiculos
-    .filter((v) => categoria === 'Todos' || v.categoria === categoria)
-    .filter((v) => status === 'Todos' || v.status === status)
-    .filter(({ marca, modelo, placa }) => `${marca} ${modelo} ${placa}`.toLowerCase().includes(termo))
-    .sort(ORDENACOES[ordem]);
+  const veiculosFiltrados = veiculos.filter((v) => {
+    const texto = (v.marca + ' ' + v.modelo + ' ' + v.placa).toLowerCase();
+    const passaBusca = texto.includes(busca.toLowerCase());
+    const passaCategoria = categoria === 'Todas' || v.categoria === categoria;
+    const passaStatus = status === 'Todos' || v.status === status;
+    return passaBusca && passaCategoria && passaStatus;
+  });
 
-  if (carregando && veiculos.length === 0) {
+  if (carregando) {
     return (
       <View style={styles.centro}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.carregando}>Carregando estoque...</Text>
+        <Text>Carregando estoque...</Text>
       </View>
     );
   }
 
-  if (erro) {
+  if (erro !== '') {
     return (
-      <EmptyState icone="cloud-offline-outline" titulo="Ops!" mensagem={erro}>
-        <Button titulo="Tentar novamente" onPress={carregarDados} />
+      <EmptyState titulo="Ops!" mensagem={erro}>
+        <Button titulo="Tentar novamente" onPress={carregarVeiculos} />
       </EmptyState>
     );
   }
@@ -70,37 +44,40 @@ export default function Listagem() {
   return (
     <View style={styles.container}>
       <View style={styles.filtros}>
-        <Input label="Buscar" placeholder="Marca, modelo ou placa" value={busca} onChangeText={setBusca} autoCapitalize="none" />
-        <View style={styles.linha}>
-          <Filtro label="Categoria" valor={categoria} onChange={setCategoria} opcoes={paraOpcoes(CATEGORIAS)} />
-          <Filtro label="Status" valor={status} onChange={setStatus} opcoes={paraOpcoes(STATUS)} />
-        </View>
-        <View style={styles.linha}>
-          <Filtro
-            label="Ordenar por"
-            valor={ordem}
-            onChange={setOrdem}
-            opcoes={[
-              { label: 'Mais novos', value: 'recentes' },
-              { label: 'Menor preço', value: 'menorPreco' },
-              { label: 'Maior preço', value: 'maiorPreco' },
-              { label: 'Menor quilometragem', value: 'menorKm' },
-            ]}
-          />
-        </View>
-      </View>
+        <Input label="Buscar" placeholder="Marca, modelo ou placa" value={busca} onChangeText={setBusca} />
 
-      <Text style={styles.contador}>
-        {veiculosFiltrados.length} de {veiculos.length} veículos
-      </Text>
+        <View style={styles.linha}>
+          <View style={styles.coluna}>
+            <Text style={styles.label}>Categoria</Text>
+            <Picker selectedValue={categoria} onValueChange={setCategoria} style={styles.picker}>
+              <Picker.Item label="Todas" value="Todas" />
+              {CATEGORIAS.map((item) => (
+                <Picker.Item key={item} label={item} value={item} />
+              ))}
+            </Picker>
+          </View>
+
+          <View style={styles.coluna}>
+            <Text style={styles.label}>Status</Text>
+            <Picker selectedValue={status} onValueChange={setStatus} style={styles.picker}>
+              <Picker.Item label="Todos" value="Todos" />
+              {STATUS.map((item) => (
+                <Picker.Item key={item} label={item} value={item} />
+              ))}
+            </Picker>
+          </View>
+        </View>
+
+        <Text style={styles.contador}>
+          {veiculosFiltrados.length} de {veiculos.length} veículos
+        </Text>
+      </View>
 
       <FlatList
         data={veiculosFiltrados}
-        keyExtractor={(item) => String(item.id)}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => <VehicleCard veiculo={item} />}
         contentContainerStyle={styles.lista}
-        refreshing={carregando}
-        onRefresh={carregarDados}
         ListEmptyComponent={<EmptyState titulo="Nenhum veículo encontrado" mensagem="Altere os filtros ou a busca." />}
       />
     </View>

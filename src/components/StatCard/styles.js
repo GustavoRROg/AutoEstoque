@@ -5,11 +5,11 @@ export default StyleSheet.create({
   card: {
     flex: 1,
     backgroundColor: colors.primary,
-    borderRadius: 14,
+    borderRadius: 12,
     padding: 12,
-    marginHorizontal: 4,
+    margin: 4,
     alignItems: 'center',
   },
-  valor: { fontSize: 18, fontWeight: '800', color: colors.white, marginTop: 6 },
-  legenda: { fontSize: 11, color: colors.textOnDark, marginTop: 2, textAlign: 'center' },
+  valor: { fontSize: 18, fontWeight: 'bold', color: colors.accent },
+  legenda: { fontSize: 12, color: colors.white, marginTop: 4, textAlign: 'center' },
 });

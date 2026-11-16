@@ -1,23 +1,11 @@
 import React from 'react';
-import { TouchableOpacity, Text, ActivityIndicator } from 'react-native';
-import colors from '../../theme/colors';
+import { TouchableOpacity, Text } from 'react-native';
 import styles from './styles';
 
-// Botão reutilizável. variante: 'primario' | 'secundario' | 'destaque'
-export default function Button({ titulo, onPress, variante = 'primario', carregando = false, desabilitado = false, estilo }) {
-  const inativo = desabilitado || carregando;
+export default function Button({ titulo, onPress, secundario }) {
   return (
-    <TouchableOpacity
-      style={[styles.base, styles[variante], inativo && styles.inativo, estilo]}
-      onPress={onPress}
-      disabled={inativo}
-      activeOpacity={0.8}
-    >
-      {carregando ? (
-        <ActivityIndicator color={variante === 'secundario' ? colors.primary : colors.white} />
-      ) : (
-        <Text style={[styles.texto, styles[`texto_${variante}`]]}>{titulo}</Text>
-      )}
+    <TouchableOpacity style={secundario ? styles.secundario : styles.primario} onPress={onPress}>
+      <Text style={secundario ? styles.textoSecundario : styles.texto}>{titulo}</Text>
     </TouchableOpacity>
   );
 }

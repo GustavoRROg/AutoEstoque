@@ -9,29 +9,20 @@ import colors from '../theme/colors';
 
 const Drawer = createDrawerNavigator();
 
-// Fonte única das rotas: usada pelo navigator e pelo menu customizado.
-export const ROTAS = [
-  { nome: 'Cadastro', titulo: 'Cadastro de Usuários', icone: 'person-add-outline', componente: Cadastro },
-  { nome: 'Listagem', titulo: 'Estoque de Veículos', icone: 'list-outline', componente: Listagem },
-  { nome: 'Lancamento', titulo: 'Lançar Veículo', icone: 'add-circle-outline', componente: Lancamento, exigeUsuario: true },
-  { nome: 'Dashboard', titulo: 'Dashboard', icone: 'stats-chart-outline', componente: Dashboard },
-];
-
 export default function DrawerNavigator() {
   return (
     <Drawer.Navigator
       initialRouteName="Cadastro"
-      drawerContent={(props) => <CustomDrawer {...props} rotas={ROTAS} />}
+      drawerContent={(props) => <CustomDrawer {...props} />}
       screenOptions={{
         headerStyle: { backgroundColor: colors.primary },
         headerTintColor: colors.white,
-        headerTitleStyle: { fontWeight: '700' },
-        drawerStyle: { backgroundColor: colors.background, width: 290 },
       }}
     >
-      {ROTAS.map(({ nome, titulo, componente }) => (
-        <Drawer.Screen key={nome} name={nome} component={componente} options={{ title: titulo }} />
-      ))}
+      <Drawer.Screen name="Cadastro" component={Cadastro} options={{ title: 'Cadastro de Usuários' }} />
+      <Drawer.Screen name="Listagem" component={Listagem} options={{ title: 'Estoque de Veículos' }} />
+      <Drawer.Screen name="Lancamento" component={Lancamento} options={{ title: 'Lançar Veículo' }} />
+      <Drawer.Screen name="Dashboard" component={Dashboard} options={{ title: 'Dashboard' }} />
     </Drawer.Navigator>
   );
 }
