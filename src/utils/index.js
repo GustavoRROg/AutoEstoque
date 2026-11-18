@@ -1,13 +1,9 @@
-import { Alert, Platform } from 'react-native';
+import { Alert } from 'react-native';
 
 export function mostrarAlerta(titulo, mensagem) {
-  if (Platform.OS === 'web') {
-    window.alert(titulo + '\n\n' + mensagem);
-  } else {
-    Alert.alert(titulo, mensagem);
-  }
+  Alert.alert(titulo, mensagem);
 }
 
 export function formatarMoeda(valor) {
-  return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  return 'R$ ' + Number(valor).toFixed(2).replace('.', ',');
 }

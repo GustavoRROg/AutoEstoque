@@ -4,7 +4,7 @@ import colors from '../../theme/colors';
 export default StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   cabecalho: { backgroundColor: colors.primaryDark, paddingTop: 48, paddingBottom: 20, paddingHorizontal: 20 },
-  titulo: { fontSize: 20, fontWeight: 'bold', color: colors.white, marginTop: 8 },
+  titulo: { fontSize: 22, fontWeight: 'bold', color: colors.accent },
   subtitulo: { fontSize: 13, color: colors.border, marginTop: 2 },
   item: {
     flexDirection: 'row',
@@ -15,6 +15,6 @@ export default StyleSheet.create({
     borderRadius: 10,
   },
   itemAtivo: { backgroundColor: colors.primary },
-  itemTexto: { marginLeft: 14, fontSize: 15, color: colors.text },
+  itemTexto: { fontSize: 15, color: colors.text },
   itemTextoAtivo: { color: colors.white, fontWeight: 'bold' },
 });

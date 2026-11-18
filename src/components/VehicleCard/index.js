@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { formatarMoeda } from '../../utils';
 import colors from '../../theme/colors';
 import styles from './styles';
@@ -14,7 +13,6 @@ export default function VehicleCard({ veiculo }) {
 
   return (
     <View style={styles.card}>
-      <Ionicons name="car-sport-outline" size={32} color={colors.primary} />
       <View style={styles.info}>
         <Text style={styles.nome}>
           {marca} {modelo}

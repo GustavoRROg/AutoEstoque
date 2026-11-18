@@ -1,17 +1,15 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { DrawerContentScrollView } from '@react-navigation/drawer';
-import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../../context/AppContext';
 import { mostrarAlerta } from '../../utils';
-import colors from '../../theme/colors';
 import styles from './styles';
 
 const ITENS = [
-  { rota: 'Cadastro', titulo: 'Cadastro de Usuários', icone: 'person-add-outline' },
-  { rota: 'Listagem', titulo: 'Estoque de Veículos', icone: 'list-outline' },
-  { rota: 'Lancamento', titulo: 'Lançar Veículo', icone: 'add-circle-outline' },
-  { rota: 'Dashboard', titulo: 'Dashboard', icone: 'stats-chart-outline' },
+  { rota: 'Cadastro', titulo: 'Cadastro de Usuários' },
+  { rota: 'Listagem', titulo: 'Estoque de Veículos' },
+  { rota: 'Lancamento', titulo: 'Lançar Veículo' },
+  { rota: 'Dashboard', titulo: 'Dashboard' },
 ];
 
 export default function CustomDrawer(props) {
@@ -36,7 +34,6 @@ export default function CustomDrawer(props) {
   return (
     <View style={styles.container}>
       <View style={styles.cabecalho}>
-        <Ionicons name="car-sport" size={40} color={colors.accent} />
         <Text style={styles.titulo}>AutoEstoque</Text>
         <Text style={styles.subtitulo}>
           {usuarios.length} usuários · {veiculos.length} veículos
@@ -52,7 +49,6 @@ export default function CustomDrawer(props) {
               style={[styles.item, ativo && styles.itemAtivo]}
               onPress={() => navegar(item.rota)}
             >
-              <Ionicons name={item.icone} size={22} color={ativo ? colors.white : colors.primary} />
               <Text style={[styles.itemTexto, ativo && styles.itemTextoAtivo]}>{item.titulo}</Text>
             </TouchableOpacity>
           );

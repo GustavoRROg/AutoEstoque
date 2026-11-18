@@ -12,7 +12,7 @@ export default StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  info: { flex: 1, marginLeft: 12 },
+  info: { flex: 1 },
   nome: { fontSize: 16, fontWeight: 'bold', color: colors.text },
   detalhes: { fontSize: 13, color: colors.textMuted, marginTop: 2 },
   categoria: { fontSize: 12, color: colors.secondary, marginTop: 4 },

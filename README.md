@@ -30,4 +30,4 @@ na constante `BASE_URL` do arquivo `src/services/api.js`.
 ## Dependências
 `@react-navigation/native`, `@react-navigation/drawer`, `@react-native-picker/picker`,
 `react-native-gesture-handler`, `react-native-reanimated`, `react-native-screens`,
-`react-native-safe-area-context`, `@expo/vector-icons`, `expo-status-bar`.
+`react-native-safe-area-context`.

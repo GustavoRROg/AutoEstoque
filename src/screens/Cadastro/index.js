@@ -24,15 +24,15 @@ export default function Cadastro({ navigation }) {
     }
     if (cpf === '') {
       novosErros.cpf = 'O CPF é obrigatório.';
-    } else if (cpf.length !== 11) {
+    } else if (cpf.length !== 11 || isNaN(cpf)) {
       novosErros.cpf = 'O CPF deve ter 11 números.';
     } else if (usuarios.some((u) => u.cpf === cpf)) {
       novosErros.cpf = 'Este CPF já está cadastrado.';
     }
     if (telefone === '') {
       novosErros.telefone = 'O telefone é obrigatório.';
-    } else if (telefone.length < 10) {
-      novosErros.telefone = 'Informe o DDD e o número.';
+    } else if (telefone.length < 10 || isNaN(telefone)) {
+      novosErros.telefone = 'Informe o DDD e o número, somente números.';
     }
     setErros(novosErros);
     return Object.keys(novosErros).length === 0;
@@ -80,16 +80,18 @@ export default function Cadastro({ navigation }) {
         label="CPF (somente números)"
         placeholder="00000000000"
         keyboardType="numeric"
+        maxLength={11}
         value={cpf}
-        onChangeText={(texto) => setCpf(texto.replace(/[^0-9]/g, '').slice(0, 11))}
+        onChangeText={setCpf}
         erro={erros.cpf}
       />
       <Input
         label="Telefone com DDD (somente números)"
         placeholder="11987654321"
         keyboardType="phone-pad"
+        maxLength={11}
         value={telefone}
-        onChangeText={(texto) => setTelefone(texto.replace(/[^0-9]/g, '').slice(0, 11))}
+        onChangeText={setTelefone}
         erro={erros.telefone}
       />
 

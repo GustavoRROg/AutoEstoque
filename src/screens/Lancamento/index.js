@@ -34,13 +34,14 @@ export default function Lancamento({ navigation }) {
     const novosErros = {};
     if (marca.trim() === '') novosErros.marca = 'Informe a marca.';
     if (modelo.trim() === '') novosErros.modelo = 'Informe o modelo.';
-    if (ano.length !== 4) novosErros.ano = 'Informe o ano com 4 números.';
+    if (ano.length !== 4 || isNaN(ano)) novosErros.ano = 'Informe o ano com 4 números.';
     if (placa.length !== 7) {
       novosErros.placa = 'A placa deve ter 7 caracteres.';
     } else if (veiculos.some((v) => v.placa === placa)) {
       novosErros.placa = 'Esta placa já está no estoque.';
     }
-    if (preco === '' || Number(preco) <= 0) novosErros.preco = 'Informe um preço válido.';
+    if (km !== '' && isNaN(km)) novosErros.km = 'Use somente números.';
+    if (preco === '' || isNaN(preco) || Number(preco) <= 0) novosErros.preco = 'Informe um preço válido.';
     if (categoria === '') novosErros.categoria = 'Selecione a categoria.';
     if (responsavel === '') novosErros.responsavel = 'Selecione o responsável.';
     setErros(novosErros);
@@ -97,7 +98,7 @@ export default function Lancamento({ navigation }) {
         keyboardType="numeric"
         maxLength={4}
         value={ano}
-        onChangeText={(texto) => setAno(texto.replace(/[^0-9]/g, ''))}
+        onChangeText={setAno}
         erro={erros.ano}
       />
       <Input
@@ -114,14 +115,15 @@ export default function Lancamento({ navigation }) {
         placeholder="Ex.: 35000"
         keyboardType="numeric"
         value={km}
-        onChangeText={(texto) => setKm(texto.replace(/[^0-9]/g, ''))}
+        onChangeText={setKm}
+        erro={erros.km}
       />
       <Input
         label="Preço (R$)"
         placeholder="Ex.: 89900"
         keyboardType="numeric"
         value={preco}
-        onChangeText={(texto) => setPreco(texto.replace(/[^0-9]/g, ''))}
+        onChangeText={setPreco}
         erro={erros.preco}
       />
 
